@@ -5,6 +5,7 @@
 # Robot Library (Java)
 
 This is the Java Library Implementation of the Virtual Robots under, *Pera-Swarm*
+This Java virtual robot is used by the programming and compiler toolchain for multi agent systems project.
 
 ---
 

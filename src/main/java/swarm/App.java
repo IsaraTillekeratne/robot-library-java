@@ -11,6 +11,8 @@ import java.util.Properties;
 
 import Robots.*;
 import swarm.robot.VirtualRobot;
+import swarm.robot.exception.SensorException;
+import swarm.robot.sensors.ColorSensor;
 
 public class App extends Thread {
 
@@ -35,27 +37,26 @@ public class App extends Thread {
             reader.close();
 
             // Start a single robot
-//            Robot robot = new MyTestRobot(7, 0, 0, 90);
-//            new Thread(robot).start();
+            Robot robot = new DynamicTaskAllocationRobot(0, 0, 0, 90);
+            new Thread(robot).start();
 
             // Start a swarm of robots
-            int[] robotList = { 0, 1, 2, 3, 4 };
-
-            int startX = 0;
-            int startY = 0;
-            int startHeading = 90;
-
-            Robot[] vr = new VirtualRobot[robotList.length];
-
-            for (int i = 0; i < robotList.length; i++) {
-
-                startX = startX + 4 * i;
-                startY = startY + 5 * i;
-                startHeading = startHeading + 10 * i;
-//                 System.out.println("Robot "+i+ "  X: " +startX+" Y: "+startY+" heading: "+startHeading);
-                vr[i] = new DynamicTaskAllocationRobot(robotList[i], startX, startY, startHeading);
-                new Thread(vr[i]).start();
-            }
+//            int[] robotList = { 0, 1, 2, 3, 4 };
+//
+//            int startX = 0;
+//            int startY = 0;
+//            int startHeading = 90;
+//
+//            Robot[] vr = new VirtualRobot[robotList.length];
+//
+//            for (int i = 0; i < robotList.length; i++) {
+//
+//                startX = startX + 4 * i;
+//                startY = startY + 5 * i;
+//                startHeading = startHeading + 10 * i;
+//                vr[i] = new DynamicTaskAllocationRobot(robotList[i], startX, startY, startHeading);
+//                new Thread(vr[i]).start();
+//            }
 
 
         } catch (FileNotFoundException ex) {

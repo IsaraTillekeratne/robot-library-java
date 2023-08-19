@@ -5,7 +5,7 @@ import swarm.robot.VirtualRobot;
 public class ObstacleAvoidanceRobot extends VirtualRobot {
 
     // The minimum distance that robot tries to keep with the obstacles
-    private int distanceThreshold = 30;
+    private int distanceThreshold = 15;
 
     // The default movement speed
     private int defaultMoveSpeed = 100;
@@ -21,6 +21,10 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
     @Override
     public void loop() throws Exception {
         super.loop();
+        avoidObstacleWithRandomMove();
+    }
+
+    public void avoidObstacleWithRandomMove() throws Exception {
         if (state == robotState.RUN) {
 
             double dist = distSensor.getDistance();

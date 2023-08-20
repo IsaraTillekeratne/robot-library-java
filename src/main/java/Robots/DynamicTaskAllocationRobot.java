@@ -1,5 +1,7 @@
 package Robots;
 
+import org.json.simple.parser.ParseException;
+import swarm.mqtt.MqttMsg;
 import swarm.robot.exception.SensorException;
 import swarm.robot.types.RGBColorType;
 
@@ -55,7 +57,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         runTaskSelectionAlgorithm();
     }
 
-    public void runTaskSelectionAlgorithm() throws SensorException {
+    public void runTaskSelectionAlgorithm() throws SensorException, ParseException {
         // dummy algorithm
 //        if(colorSensor.getColor().compareTo(new RGBColorType(255,0,0))){
 //            neoPixel.changeColor(255,0,0);
@@ -63,7 +65,16 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 //            neoPixel.changeColor(0,0,255);
 //        }
 
-        // real algorithm starts here
+        // tried communication but did not work
+//        if(this.getId()==0){
+//            simpleComm.sendMessage("r",90);
+//        }
+//        if(!robotMqttClient.inQueue.isEmpty()){
+//            MqttMsg m = robotMqttClient.inQueue.poll();
+//            simpleComm.handleSubscription(this,m);
+//        }
+
+        // REAL ALGORITHM STARTS HERE
         observe();
         evaluateTaskDemand();
         evaluateTaskSupply();
@@ -115,7 +126,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         System.out.print("Task Demand Queue: ");
         printQueue(taskDemandQueue);
 
-        // CHANGE
+        // CHANGE THIS USING ROBOT SIMPLE COMMUNICATION METHOD
         Random random1 = new Random();
         Random random2 = new Random();
         String[] colour = {"r", "b"};
@@ -207,10 +218,16 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         if(selectedTask == "r"){
             // robot show color white (representing task red)
             neoPixel.changeColor(255,255,255);
+            // robot sends r msg to neighbouring robots within 20 radius
+            simpleComm.sendMessage("r",20);
         }else if(selectedTask == "b"){
             // robot show color green (representing task blue)
             neoPixel.changeColor(0,255,0);
+            // robot sends b msg to neighbouring robots within 20 radius
+            simpleComm.sendMessage("b",20);
         }
     }
+
+
 
 }

@@ -40,6 +40,12 @@ public class App extends Thread {
             Robot robot = new DynamicTaskAllocationRobot(0, 0, 0, 90);
             new Thread(robot).start();
 
+            Robot robot2 = new DynamicTaskAllocationRobot(1,0,20,90);
+            new Thread(robot2).start();
+
+//            Robot robot3 = new DynamicTaskAllocationRobot(2,0,-61,90);
+//            new Thread(robot3).start();
+
             // Start a swarm of robots
 //            int[] robotList = { 0, 1, 2, 3, 4 };
 //

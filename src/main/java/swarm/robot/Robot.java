@@ -231,8 +231,7 @@ public abstract class Robot implements Runnable, IRobotState {
 
     /**
      * Delay the robot functionality for a given time
-     * 
-     * @param delay, delay in milliseconds
+     *
      */
     public void delay(int milliseconds) {
         try {

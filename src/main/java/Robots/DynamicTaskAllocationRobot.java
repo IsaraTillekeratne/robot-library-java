@@ -1,6 +1,5 @@
 package Robots;
 
-import org.json.simple.parser.ParseException;
 import swarm.mqtt.MqttMsg;
 import swarm.robot.exception.SensorException;
 import swarm.robot.types.RGBColorType;
@@ -57,29 +56,14 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         runTaskSelectionAlgorithm();
     }
 
-    public void runTaskSelectionAlgorithm() throws SensorException, ParseException {
-        // dummy algorithm
-//        if(colorSensor.getColor().compareTo(new RGBColorType(255,0,0))){
-//            neoPixel.changeColor(255,0,0);
-//        } else if (colorSensor.getColor().compareTo(new RGBColorType(0,0,255))) {
-//            neoPixel.changeColor(0,0,255);
-//        }
-
-        // tried communication but did not work
-//        if(this.getId()==0){
-//            simpleComm.sendMessage("r",90);
-//        }
-//        if(!robotMqttClient.inQueue.isEmpty()){
-//            MqttMsg m = robotMqttClient.inQueue.poll();
-//            simpleComm.handleSubscription(this,m);
-//        }
+    public void runTaskSelectionAlgorithm() throws SensorException {
 
         // REAL ALGORITHM STARTS HERE
         observe();
         evaluateTaskDemand();
         evaluateTaskSupply();
         selectTask();
-        delay(2000);
+        delay(2000); // time interval
     }
 
     public void addDemand(String colourOfObject){
@@ -111,39 +95,38 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
         System.out.println();
 
+        // OBSERVE TASK DEMAND
         RGBColorType detectedColor = colorSensor.getColor();
 
         // if red detected, populate demand queue with "r", if blue detected with "b"
         if(detectedColor.compareTo(new RGBColorType(255,0,0))){
             addDemand("r");
-            System.out.println(detectedColor+ " Object detected. Demand queue updated.");
+            System.out.println("Robot: "+this.getId()+" "+detectedColor+ " Object detected. Demand queue updated.");
         } else if (detectedColor.compareTo(new RGBColorType(0,0,255))) {
             addDemand("b");
-            System.out.println(detectedColor+ " Object detected. Demand queue updated.");
+            System.out.println("Robot: "+this.getId()+" "+detectedColor+ " Object detected. Demand queue updated.");
         }
 
         // print task demand queue
-        System.out.print("Task Demand Queue: ");
+        System.out.print("Robot: "+this.getId()+" "+"Task Demand Queue: ");
         printQueue(taskDemandQueue);
 
-        // CHANGE THIS USING ROBOT SIMPLE COMMUNICATION METHOD
-        Random random1 = new Random();
-        Random random2 = new Random();
-        String[] colour = {"r", "b"};
-
-        // if a neighbouring robot sends task detail - code
-        if(random1.nextBoolean()){
-            // String colourOfNeighbourRobot = "r"; // hardcoded
-            String colourOfNeighbourRobot = colour[random2.nextInt(2)]; // randomly choose r or b
-            addSupply(colourOfNeighbourRobot);
-
-            System.out.println(colourOfNeighbourRobot+ " Robot detected. Supply queue updated as below.");
-            System.out.print("Task Supply Queue: ");
-            for (String item: taskSupplyQueue) {
-                System.out.print(item + " ");
+        // OBSERVE TASK SUPPLY
+        if(!robotMqttClient.inQueue.isEmpty()){
+            MqttMsg m = robotMqttClient.inQueue();
+            if(m.message=="r"){
+                addSupply("r");
+                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
+            } else if (m.message=="b") {
+                addSupply("b");
+                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
             }
-            System.out.println();
+
         }
+
+        // print task supply queue
+        System.out.print("Robot: "+this.getId()+" "+"Task Supply Queue: ");
+        printQueue(taskSupplyQueue);
     }
 
     public void printQueue(Queue<String> queue){
@@ -159,10 +142,10 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
             // Red Task
             estimatedTaskDemandForRed = (float) (Collections.frequency(taskDemandQueue, "r")) /(fixedQueueLength);
-            System.out.println("Task demand for red calculated: "+ estimatedTaskDemandForRed);
+            System.out.println("Robot: "+this.getId()+" "+"Task demand for red calculated: "+ estimatedTaskDemandForRed);
             // Blue Task
             estimatedTaskDemandForBlue = (float) (Collections.frequency(taskDemandQueue, "b")) /(fixedQueueLength);
-            System.out.println("Task demand for blue calculated: "+ estimatedTaskDemandForBlue);
+            System.out.println("Robot: "+this.getId()+" "+"Task demand for blue calculated: "+ estimatedTaskDemandForBlue);
         }
 
     }
@@ -173,10 +156,10 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
             // Red Task
             estimatedTaskSupplyForRed = (float) (Collections.frequency(taskSupplyQueue, "r")) /(fixedQueueLength);
-            System.out.println("Task supply for red calculated: "+ estimatedTaskSupplyForRed);
+            System.out.println("Robot: "+this.getId()+" "+"Task supply for red calculated: "+ estimatedTaskSupplyForRed);
             // Blue Task
             estimatedTaskSupplyForBlue = (float) (Collections.frequency(taskSupplyQueue, "b")) /(fixedQueueLength);
-            System.out.println("Task supply for blue calculated: "+ estimatedTaskSupplyForBlue);
+            System.out.println("Robot: "+this.getId()+" "+"Task supply for blue calculated: "+ estimatedTaskSupplyForBlue);
         }
 
     }
@@ -185,18 +168,18 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
         // calculate new response threshold for Red
         responseThresholdRedNext = (responseThresholdRed - (scalingFactor * (estimatedTaskDemandForRed - estimatedTaskSupplyForRed)));
-        System.out.println("Next Response threshold for red calculated: "+ responseThresholdRed);
+        System.out.println("Robot: "+this.getId()+" "+"Next Response threshold for red calculated: "+ responseThresholdRed);
         // calculate new response threshold for Blue
         responseThresholdBlueNext = (responseThresholdBlue - (scalingFactor * (estimatedTaskDemandForBlue - estimatedTaskSupplyForBlue)));
-        System.out.println("Next Response threshold for blue calculated: "+ responseThresholdBlue);
+        System.out.println("Robot: "+this.getId()+" "+"Next Response threshold for blue calculated: "+ responseThresholdBlue);
 
         // calculate task selection probability for Red
         taskSelectionProbabilityRed = (float) ((Math.pow(estimatedTaskDemandForRed, n))/(Math.pow(estimatedTaskDemandForRed, n) + Math.pow(responseThresholdRed, n)));
-        System.out.println("Task selection probability for red calculated: "+ taskSelectionProbabilityRed);
+        System.out.println("Robot: "+this.getId()+" "+"Task selection probability for red calculated: "+ taskSelectionProbabilityRed);
 
         // calculate task selection probability for Blue
         taskSelectionProbabilityBlue = (float) ((Math.pow(estimatedTaskDemandForBlue, n))/(Math.pow(estimatedTaskDemandForBlue, n) + Math.pow(responseThresholdBlue, n)));
-        System.out.println("Task selection probability for blue calculated: "+ taskSelectionProbabilityBlue);
+        System.out.println("Robot: "+this.getId()+" "+"Task selection probability for blue calculated: "+ taskSelectionProbabilityBlue);
 
         if(taskSelectionProbabilityRed < taskSelectionProbabilityBlue){
             selectedTask = "b";
@@ -210,7 +193,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         responseThresholdRed = responseThresholdRedNext;
         responseThresholdBlue = responseThresholdBlueNext;
 
-        System.out.println("Robot selected task: "+ selectedTask);
+        System.out.println("Robot: "+this.getId()+" "+"selected task: "+ selectedTask);
         System.out.println();
     }
 
@@ -227,7 +210,5 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
             simpleComm.sendMessage("b",20);
         }
     }
-
-
 
 }

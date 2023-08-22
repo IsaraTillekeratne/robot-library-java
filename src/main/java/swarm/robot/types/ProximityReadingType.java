@@ -34,4 +34,8 @@ public class ProximityReadingType {
     public String toString() {
         return readings[0] + " " + readings[1] + " " + readings[2] + " " + readings[3] + " " + readings[4];
     }
+
+    public int[] getReadings() {
+        return readings;
+    }
 }

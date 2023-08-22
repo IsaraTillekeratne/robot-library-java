@@ -15,6 +15,9 @@ import swarm.robot.sensors.ColorSensor;
 import swarm.robot.sensors.DistanceSensor;
 import swarm.robot.sensors.ProximitySensor;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Abstract Class implementation for Robot
  * 
@@ -44,6 +47,7 @@ public abstract class Robot implements Runnable, IRobotState {
     protected int id;
     protected char reality;
     protected robotState state = robotState.WAIT;
+//    public ExecutorService executor;
 
     /**
      * Abstract Robot class
@@ -70,6 +74,8 @@ public abstract class Robot implements Runnable, IRobotState {
 
         delay(1000);
         this.motion = new MotionController(coordinates);
+
+
     }
 
     /**
@@ -88,6 +94,9 @@ public abstract class Robot implements Runnable, IRobotState {
 
         coordinates.setCoordinate(coordinates.getX(), coordinates.getY(), coordinates.getHeading());
         coordinates.publishCoordinate();
+
+        // Create a thread pool with two threads
+//        executor = Executors.newFixedThreadPool(2);
     }
 
     /**

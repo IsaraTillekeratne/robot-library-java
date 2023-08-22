@@ -11,7 +11,9 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
     private int defaultMoveSpeed = 100;
 
     public ObstacleAvoidanceRobot(int id, double x, double y, double heading) {
+
         super(id, x, y, heading);
+
     }
 
     public void setup() {

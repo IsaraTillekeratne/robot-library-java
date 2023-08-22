@@ -4,10 +4,7 @@ import swarm.mqtt.MqttMsg;
 import swarm.robot.exception.SensorException;
 import swarm.robot.types.RGBColorType;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 
 public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
@@ -54,16 +51,28 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
     public void loop() throws Exception {
         super.loop();
         runTaskSelectionAlgorithm();
+//        executor.execute(() -> {
+//            try {
+//                runTaskSelectionAlgorithm(); // Execute action2 in a separate thread
+////                System.out.println("Dynamic task! Robot: " +this.getId()+" Thread name:  "+
+////                        Thread.currentThread().getName());
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
     }
 
     public void runTaskSelectionAlgorithm() throws SensorException {
 
         // REAL ALGORITHM STARTS HERE
-        observe();
-        evaluateTaskDemand();
-        evaluateTaskSupply();
-        selectTask();
-        delay(2000); // time interval
+        if (state == robotState.RUN){
+
+            observe();
+            evaluateTaskDemand();
+            evaluateTaskSupply();
+            selectTask();
+            delay(2000); // time interval
+        }
     }
 
     public void addDemand(String colourOfObject){
@@ -91,7 +100,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
     }
 
     // observe method will populate the taskDemand and taskSupply queues
-    public void observe() throws SensorException {
+    public void observe() throws SensorException { // Cluster Behaviour
 
         System.out.println();
 
@@ -101,10 +110,10 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         // if red detected, populate demand queue with "r", if blue detected with "b"
         if(detectedColor.compareTo(new RGBColorType(255,0,0))){
             addDemand("r");
-            System.out.println("Robot: "+this.getId()+" "+detectedColor+ " Object detected. Demand queue updated.");
+//            System.out.println("Robot: "+this.getId()+" "+detectedColor+ " Object detected. Demand queue updated.");
         } else if (detectedColor.compareTo(new RGBColorType(0,0,255))) {
             addDemand("b");
-            System.out.println("Robot: "+this.getId()+" "+detectedColor+ " Object detected. Demand queue updated.");
+//            System.out.println("Robot: "+this.getId()+" "+detectedColor+ " Object detected. Demand queue updated.");
         }
 
         // print task demand queue
@@ -114,12 +123,12 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         // OBSERVE TASK SUPPLY
         if(!robotMqttClient.inQueue.isEmpty()){
             MqttMsg m = robotMqttClient.inQueue();
-            if(m.message=="r"){
+            if(Objects.equals(m.message, "r")){
                 addSupply("r");
-                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
-            } else if (m.message=="b") {
+//                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
+            } else if (Objects.equals(m.message, "b")) {
                 addSupply("b");
-                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
+//                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
             }
 
         }
@@ -136,7 +145,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         System.out.println();
     }
 
-    public void evaluateTaskDemand(){
+    public void evaluateTaskDemand(){ // Cluster Behaviour
 
         if(!taskDemandQueue.isEmpty()){
 
@@ -150,7 +159,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
     }
 
-    public void evaluateTaskSupply(){
+    public void evaluateTaskSupply(){ // Cluster Behaviour
 
         if(!taskSupplyQueue.isEmpty()){
 
@@ -164,7 +173,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
     }
 
-    public void selectTask(){
+    public void selectTask(){ // Cluster Behaviour
 
         // calculate new response threshold for Red
         responseThresholdRedNext = (responseThresholdRed - (scalingFactor * (estimatedTaskDemandForRed - estimatedTaskSupplyForRed)));
@@ -197,17 +206,17 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         System.out.println();
     }
 
-    public void showSelectedTask(){
+    public void showSelectedTask(){ // Atomic Behaviour
         if(selectedTask == "r"){
             // robot show color white (representing task red)
             neoPixel.changeColor(255,255,255);
-            // robot sends r msg to neighbouring robots within 20 radius
-            simpleComm.sendMessage("r",20);
+            // robot sends r msg to neighbouring robots within 50 radius
+            simpleComm.sendMessage("r",50);
         }else if(selectedTask == "b"){
             // robot show color green (representing task blue)
             neoPixel.changeColor(0,255,0);
-            // robot sends b msg to neighbouring robots within 20 radius
-            simpleComm.sendMessage("b",20);
+            // robot sends b msg to neighbouring robots within 50 radius
+            simpleComm.sendMessage("b",50);
         }
     }
 

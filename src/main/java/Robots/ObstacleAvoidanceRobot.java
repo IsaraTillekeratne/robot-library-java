@@ -17,9 +17,7 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
     private int defaultMoveSpeed = 100;
 
     public ObstacleAvoidanceRobot(int id, double x, double y, double heading) {
-
         super(id, x, y, heading);
-
     }
 
     public void setup() {
@@ -39,7 +37,7 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
             int R_DIST = proximity.getReadings()[3];
             int RB_DIST = proximity.getReadings()[4];
 
-                System.out.println("\t pros: " + proximity + " dist:  " + F_DIST);
+//            System.out.println("\t pros: " + proximity + " dist:  " + F_DIST);
 
 
             if (F_DIST < distanceThreshold || L_DIST < distanceThreshold || R_DIST<distanceThreshold) {
@@ -57,7 +55,7 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
                 }
 
                 ProximityReadingType prox = proximitySensor.getProximity();
-            
+
                 int L = prox.getReadings()[1];
                 int R = prox.getReadings()[3];
 

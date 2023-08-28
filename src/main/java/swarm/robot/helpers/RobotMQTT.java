@@ -6,6 +6,8 @@ import swarm.mqtt.RobotMqttClient;
 import swarm.mqtt.MqttMsg;
 import swarm.robot.Robot;
 
+import swarm.ota.otaUpdate;
+
 import java.util.HashMap;
 
 /**
@@ -20,10 +22,12 @@ public class RobotMQTT {
     protected char reality;
 
     private enum mqttTopic {
-        ROBOT_MSG, ROBOT_MSG_BROADCAST
+        ROBOT_MSG, ROBOT_MSG_BROADCAST,OTA_UPDATE
     }
 
     private final HashMap<mqttTopic, String> topicsSub = new HashMap<mqttTopic, String>();
+
+    private static boolean otaUpdateInProgress = false; // Flag to track OTA update status
 
     /**
      * RobotMQTT class
@@ -39,6 +43,9 @@ public class RobotMQTT {
 
         subscribe(mqttTopic.ROBOT_MSG, "robot/msg/" + robotId);
         subscribe(mqttTopic.ROBOT_MSG_BROADCAST, "robot/msg/broadcast");
+
+        subscribe(mqttTopic.OTA_UPDATE, "robot/ota/broadcast");
+
     }
 
     /**
@@ -114,7 +121,19 @@ public class RobotMQTT {
                     break;
             }
 
-        } else {
+        } 
+        else if (topic.equals(topicsSub.get(mqttTopic.OTA_UPDATE))){
+            System.out.println("topic: " + topic + "> " + msg);
+            if(!otaUpdateInProgress){
+                otaUpdateInProgress = true;
+                otaUpdate updater = new otaUpdate();
+                updater.downloadBinFile();
+            }
+            else {
+                System.out.println("OTA update already in progress. Ignoring message.");
+            }
+        }
+        else {
             System.out.println("Received (unknown): " + topic + "> " + msg);
         }
 

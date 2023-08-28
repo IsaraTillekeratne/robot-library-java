@@ -4,6 +4,8 @@ import swarm.mqtt.MqttMsg;
 import swarm.robot.exception.SensorException;
 import swarm.robot.types.RGBColorType;
 
+import csvRecorder.CsvRecorder;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -28,8 +30,12 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
     float taskSelectionProbabilityBlue;
     String selectedTask;
 
+    long startTime = System.currentTimeMillis();
+    int robotId;
+
     public DynamicTaskAllocationRobot(int id, double x, double y, double heading) {
         super(id, x, y, heading);
+        robotId = id;
     }
 
     public void setup() {
@@ -64,6 +70,23 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         evaluateTaskSupply();
         selectTask();
         delay(2000); // time interval
+
+        long endTime = System.currentTimeMillis(); // Record the end time
+        long elapsedTime = endTime - startTime; // Calculate the elapsed time in milliseconds
+            double[] values = {
+                robotId, 
+                elapsedTime,
+                responseThresholdRed,
+                responseThresholdBlue,
+                estimatedTaskDemandForRed,
+                estimatedTaskDemandForBlue,
+                estimatedTaskSupplyForRed,
+                estimatedTaskSupplyForBlue,
+                taskSelectionProbabilityRed,
+                taskSelectionProbabilityBlue,
+            };
+
+        CsvRecorder.writeRecordToCSV("src/main/java/csvRecorder/record.csv", values, selectedTask);
     }
 
     public void addDemand(String colourOfObject){
@@ -161,7 +184,6 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
             estimatedTaskSupplyForBlue = (float) (Collections.frequency(taskSupplyQueue, "b")) /(fixedQueueLength);
             System.out.println("Robot: "+this.getId()+" "+"Task supply for blue calculated: "+ estimatedTaskSupplyForBlue);
         }
-
     }
 
     public void selectTask(){

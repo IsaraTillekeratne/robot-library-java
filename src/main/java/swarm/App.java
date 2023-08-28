@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import Robots.*;
+import csvRecorder.CsvRecorder;
 import swarm.robot.VirtualRobot;
 import swarm.robot.exception.SensorException;
 import swarm.robot.sensors.ColorSensor;
@@ -54,6 +55,9 @@ public class App extends Thread {
             int startHeading = 90;
 
             Robot[] vr = new VirtualRobot[robotList.length];
+
+            CsvRecorder.addEmptyRowToCSV("src/main/java/csvRecorder/record.csv");
+
 
             for (int i = 0; i < robotList.length; i++) {
 

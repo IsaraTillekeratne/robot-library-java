@@ -32,13 +32,15 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
 
         if (state == robotState.RUN) {
             int F_DIST , LB_DIST, L_DIST, R_DIST, RB_DIST;
-
+            
+//            System.out.println("\t pros: " + proximity + " dist:  " + F_DIST);
             int[] readings = proximitySensor.getProximity().getReadings();
             F_DIST = readings[2];
             LB_DIST = readings[0];
             L_DIST = readings[1];
             R_DIST = readings[3];
             RB_DIST = readings[4];
+
 
 
 
@@ -50,9 +52,15 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
                 }
 
                 ProximityReadingType prox = proximitySensor.getProximity();
+
+
+                int L = prox.getReadings()[1];
+                int R = prox.getReadings()[3];
+
             
                 int Left = prox.getReadings()[1];
                 int Right = prox.getReadings()[3];
+
 
                 int sign ;
                 int random = -1000 + ((int) ((Math.random() * 2000)));

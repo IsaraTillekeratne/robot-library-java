@@ -37,36 +37,55 @@ public class App extends Thread {
             MQTTSettings.channel = props.getProperty("channel", "v1");
             reader.close();
 
-            // Start a single robot
-//            Robot robot = new DynamicTaskAllocationRobot(0, 0, 0, 90);
-//            new Thread(robot).start();
-//
-//            Robot robot2 = new DynamicTaskAllocationRobot(1,0,20,90);
-//            new Thread(robot2).start();
-
-//            Robot robot3 = new DynamicTaskAllocationRobot(2,0,-61,90);
-//            new Thread(robot3).start();
-
-            // Start a swarm of robots
-            int[] robotList = { 0, 1, 2, 3, 4 };
-
-            int startX = 0;
-            int startY = 0;
-            int startHeading = 90;
-
-            Robot[] vr = new VirtualRobot[robotList.length];
-
             CsvRecorder.addEmptyRowToCSV("src/main/java/csvRecorder/record.csv");
 
+            // Start a single robot
+            Robot robot0 = new DynamicTaskAllocationRobot(0, 0, 0, 120);
+            new Thread(robot0).start();
 
-            for (int i = 0; i < robotList.length; i++) {
+            Robot robot1 = new DynamicTaskAllocationRobot(1,75,0,120);
+            new Thread(robot1).start();
 
-                startX = startX + 10 * i;
-                startY = startY + 11 * i;
-                startHeading = startHeading + 10 * i;
-                vr[i] = new DynamicTaskAllocationRobot(robotList[i], startX, startY, startHeading);
-                new Thread(vr[i]).start();
-            }
+            Robot robot2 = new DynamicTaskAllocationRobot(2,-75,0,120);
+            new Thread(robot2).start();
+
+            Robot robot3 = new DynamicTaskAllocationRobot(3,-75,50,120);
+            new Thread(robot3).start();
+
+            Robot robot4 = new DynamicTaskAllocationRobot(4,75,50,120);
+            new Thread(robot4).start();
+
+            Robot robot5 = new DynamicTaskAllocationRobot(5,50,100,120);
+            new Thread(robot5).start();
+
+            Robot robot6 = new DynamicTaskAllocationRobot(6,-50,100,120);
+            new Thread(robot6).start();
+
+            Robot robot7 = new DynamicTaskAllocationRobot(7,-75,-25,120);
+            new Thread(robot7).start();
+
+            Robot robot8 = new DynamicTaskAllocationRobot(8,100,-50,120);
+            new Thread(robot8).start();
+
+
+
+            // Start a swarm of robots
+//            int[] robotList = { 0, 1, 2, 3, 4 };
+//
+//            int startX = 0;
+//            int startY = 0;
+//            int startHeading = 90;
+//
+//            Robot[] vr = new VirtualRobot[robotList.length];
+//
+//            for (int i = 0; i < robotList.length; i++) {
+//
+//                startX = startX + 10 * i;
+//                startY = startY + 11 * i;
+//                startHeading = startHeading + 10 * i;
+//                vr[i] = new DynamicTaskAllocationRobot(robotList[i], startX, startY, startHeading);
+//                new Thread(vr[i]).start();
+//            }
 
 
         } catch (FileNotFoundException ex) {

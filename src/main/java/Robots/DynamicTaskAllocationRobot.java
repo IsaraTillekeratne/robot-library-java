@@ -1,18 +1,18 @@
 package Robots;
 
-import swarm.mqtt.MqttMsg;
+import swarm.behaviours.atomicBehaviours.AtomicBehaviours;
+import swarm.behaviours.clusterBehaviours.ClusterBehaviours;
 import swarm.robot.exception.SensorException;
 import swarm.robot.types.RGBColorType;
 
 import csvRecorder.CsvRecorder;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 
 public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
+    ClusterBehaviours clusterBehaviours = new ClusterBehaviours();
+    AtomicBehaviours atomicBehaviours = new AtomicBehaviours();
     Queue<String> taskDemandQueue = new LinkedList<>();
     Queue<String> taskSupplyQueue = new LinkedList<>();
     static int fixedQueueLength = 20;
@@ -44,7 +44,8 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
         // initially assign task Red
         selectedTask = "r";
-        showSelectedTask();
+//        showSelectedTask();
+        atomicBehaviours.showSelectedTask(selectedTask,this.neoPixel,this.simpleComm,this.getId());
 
         // assign initial random thresholds
         Random rand = new Random();
@@ -65,171 +66,73 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
     public void runTaskSelectionAlgorithm() throws SensorException {
 
         // REAL ALGORITHM STARTS HERE
-        observe();
-        evaluateTaskDemand();
-        evaluateTaskSupply();
-        selectTask();
-        delay(2000); // time interval
+        if (state == robotState.RUN){
 
-        long endTime = System.currentTimeMillis(); // Record the end time
-        long elapsedTime = endTime - startTime; // Calculate the elapsed time in milliseconds
-            double[] values = {
-                robotId, 
-                elapsedTime,
-                responseThresholdRed,
-                responseThresholdBlue,
-                estimatedTaskDemandForRed,
-                estimatedTaskDemandForBlue,
-                estimatedTaskSupplyForRed,
-                estimatedTaskSupplyForBlue,
-                taskSelectionProbabilityRed,
-                taskSelectionProbabilityBlue,
-            };
+//            observe();
+            RGBColorType detectedColor = colorSensor.getColor();
 
-        CsvRecorder.writeRecordToCSV("src/main/java/csvRecorder/record.csv", values, selectedTask);
-    }
+//            System.out.print("Robot: "+this.getId()+" | task demand before observe: ");
+//            printQueue(taskDemandQueue);
 
-    public void addDemand(String colourOfObject){
+            clusterBehaviours.observe(detectedColor, this.taskDemandQueue, this.taskSupplyQueue, fixedQueueLength, this.getId(), this.robotMqttClient);
 
-        int lengthOfDemandQueue = taskDemandQueue.size();
-        if(lengthOfDemandQueue<fixedQueueLength){
-            taskDemandQueue.add(colourOfObject);
-        }else{
-            taskDemandQueue.remove();
-            taskDemandQueue.add(colourOfObject);
-        }
+//            System.out.print("Robot: "+this.getId()+" | task demand after observe: ");
+//            printQueue(taskDemandQueue);
 
-    }
+//            evaluateTaskDemand();
+//            System.out.println("Robot: "+this.getId()+" "+"Task demand for blue before: "+ estimatedTaskDemandForRed);
+            float[] taskDemands = clusterBehaviours.evaluateTaskDemand(this.taskDemandQueue, fixedQueueLength, this.getId());
+            this.estimatedTaskDemandForRed = taskDemands[0];
+            this.estimatedTaskDemandForBlue = taskDemands[1];
+//            System.out.println("Robot: "+this.getId()+" "+"Task demand for blue after: "+ estimatedTaskDemandForRed);
+//            evaluateTaskSupply();
+            float[] taskSupplies = clusterBehaviours.evaluateTaskSupply(this.taskSupplyQueue, fixedQueueLength, this.getId());
+            this.estimatedTaskSupplyForRed = taskSupplies[0];
+            this.estimatedTaskSupplyForBlue = taskSupplies[1];
 
-    public void addSupply(String colourOfRobot){
+//            System.out.println("Robot: "+this.getId()+" Selected task: "+selectedTask+" Current Red Threshold: "
+//                    +this.responseThresholdRed+" Current Blue Threshold: "+this.responseThresholdBlue
+//                    +" Red Probability: "+this.taskSelectionProbabilityRed+" Blue Probability: "+this.taskSelectionProbabilityBlue);
 
-        int lengthOfSupplyQueue = taskSupplyQueue.size();
-        if(lengthOfSupplyQueue<fixedQueueLength){
-            taskSupplyQueue.add(colourOfRobot);
-        }else{
-            taskSupplyQueue.remove();
-            taskSupplyQueue.add(colourOfRobot);
-        }
+            // selectTask();
+            List<Object> outputs = clusterBehaviours.selectTask(this.responseThresholdRed,this.responseThresholdBlue,scalingFactor,this.estimatedTaskDemandForRed,this.estimatedTaskSupplyForRed
+            ,this.estimatedTaskDemandForBlue,this.estimatedTaskSupplyForBlue,n,this.getId());
 
-    }
+            selectedTask = (String) outputs.get(0);
+            this.responseThresholdRedNext = (float) outputs.get(1);
+            this.responseThresholdBlueNext = (float) outputs.get(2);
+            this.taskSelectionProbabilityRed = (float) outputs.get(3);
+            this.taskSelectionProbabilityBlue = (float) outputs.get(4);
 
-    // observe method will populate the taskDemand and taskSupply queues
-    public void observe() throws SensorException {
+//            System.out.println("Robot: "+this.getId()+" Selected task: "+selectedTask+" Next Red Threshold: "
+//            +this.responseThresholdRedNext+" Next Blue Threshold: "+this.responseThresholdBlueNext
+//            +" Red Probability: "+this.taskSelectionProbabilityRed+" Blue Probability: "+this.taskSelectionProbabilityBlue);
 
-        System.out.println();
+            // long endTime = System.currentTimeMillis(); // Record the end time
+            // long elapsedTime = endTime - startTime; // Calculate the elapsed time in milliseconds
+            // double[] values = {
+            //     this.robotId, 
+            //     elapsedTime,
+            //     this.responseThresholdRed,
+            //     this.responseThresholdBlue,
+            //     this.estimatedTaskDemandForRed,
+            //     this.estimatedTaskDemandForBlue,
+            //     this.estimatedTaskSupplyForRed,
+            //     this.estimatedTaskSupplyForBlue,
+            //     this.taskSelectionProbabilityRed,
+            //     this.taskSelectionProbabilityBlue,
+            // };
 
-        // OBSERVE TASK DEMAND
-        RGBColorType detectedColor = colorSensor.getColor();
+            // CsvRecorder.writeRecordToCSV("src/main/java/csvRecorder/record.csv", values, selectedTask);            
 
-        // if red detected, populate demand queue with "r", if blue detected with "b"
-        if(detectedColor.compareTo(new RGBColorType(255,0,0))){
-            addDemand("r");
-            System.out.println("Robot: "+this.getId()+" "+detectedColor+ " Object detected. Demand queue updated.");
-        } else if (detectedColor.compareTo(new RGBColorType(0,0,255))) {
-            addDemand("b");
-            System.out.println("Robot: "+this.getId()+" "+detectedColor+ " Object detected. Demand queue updated.");
-        }
+            this.responseThresholdRed = this.responseThresholdRedNext;
+            this.responseThresholdBlue = this.responseThresholdBlueNext;
 
-        // print task demand queue
-        System.out.print("Robot: "+this.getId()+" "+"Task Demand Queue: ");
-        printQueue(taskDemandQueue);
+//            showSelectedTask();
+            atomicBehaviours.showSelectedTask(selectedTask,this.neoPixel,this.simpleComm,this.getId());
+            delay(2000); // time interval
 
-        // OBSERVE TASK SUPPLY
-        if(!robotMqttClient.inQueue.isEmpty()){
-            MqttMsg m = robotMqttClient.inQueue();
-            if(m.message=="r"){
-                addSupply("r");
-                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
-            } else if (m.message=="b") {
-                addSupply("b");
-                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
-            }
-
-        }
-
-        // print task supply queue
-        System.out.print("Robot: "+this.getId()+" "+"Task Supply Queue: ");
-        printQueue(taskSupplyQueue);
-    }
-
-    public void printQueue(Queue<String> queue){
-        for (String item: queue) {
-            System.out.print(item + " ");
-        }
-        System.out.println();
-    }
-
-    public void evaluateTaskDemand(){
-
-        if(!taskDemandQueue.isEmpty()){
-
-            // Red Task
-            estimatedTaskDemandForRed = (float) (Collections.frequency(taskDemandQueue, "r")) /(fixedQueueLength);
-            System.out.println("Robot: "+this.getId()+" "+"Task demand for red calculated: "+ estimatedTaskDemandForRed);
-            // Blue Task
-            estimatedTaskDemandForBlue = (float) (Collections.frequency(taskDemandQueue, "b")) /(fixedQueueLength);
-            System.out.println("Robot: "+this.getId()+" "+"Task demand for blue calculated: "+ estimatedTaskDemandForBlue);
-        }
-
-    }
-
-    public void evaluateTaskSupply(){
-
-        if(!taskSupplyQueue.isEmpty()){
-
-            // Red Task
-            estimatedTaskSupplyForRed = (float) (Collections.frequency(taskSupplyQueue, "r")) /(fixedQueueLength);
-            System.out.println("Robot: "+this.getId()+" "+"Task supply for red calculated: "+ estimatedTaskSupplyForRed);
-            // Blue Task
-            estimatedTaskSupplyForBlue = (float) (Collections.frequency(taskSupplyQueue, "b")) /(fixedQueueLength);
-            System.out.println("Robot: "+this.getId()+" "+"Task supply for blue calculated: "+ estimatedTaskSupplyForBlue);
-        }
-    }
-
-    public void selectTask(){
-
-        // calculate new response threshold for Red
-        responseThresholdRedNext = (responseThresholdRed - (scalingFactor * (estimatedTaskDemandForRed - estimatedTaskSupplyForRed)));
-        System.out.println("Robot: "+this.getId()+" "+"Next Response threshold for red calculated: "+ responseThresholdRed);
-        // calculate new response threshold for Blue
-        responseThresholdBlueNext = (responseThresholdBlue - (scalingFactor * (estimatedTaskDemandForBlue - estimatedTaskSupplyForBlue)));
-        System.out.println("Robot: "+this.getId()+" "+"Next Response threshold for blue calculated: "+ responseThresholdBlue);
-
-        // calculate task selection probability for Red
-        taskSelectionProbabilityRed = (float) ((Math.pow(estimatedTaskDemandForRed, n))/(Math.pow(estimatedTaskDemandForRed, n) + Math.pow(responseThresholdRed, n)));
-        System.out.println("Robot: "+this.getId()+" "+"Task selection probability for red calculated: "+ taskSelectionProbabilityRed);
-
-        // calculate task selection probability for Blue
-        taskSelectionProbabilityBlue = (float) ((Math.pow(estimatedTaskDemandForBlue, n))/(Math.pow(estimatedTaskDemandForBlue, n) + Math.pow(responseThresholdBlue, n)));
-        System.out.println("Robot: "+this.getId()+" "+"Task selection probability for blue calculated: "+ taskSelectionProbabilityBlue);
-
-        if(taskSelectionProbabilityRed < taskSelectionProbabilityBlue){
-            selectedTask = "b";
-        }else if(taskSelectionProbabilityBlue < taskSelectionProbabilityRed){
-            selectedTask = "r";
-        }
-
-        showSelectedTask();
-
-        // update response thresholds for next iteration
-        responseThresholdRed = responseThresholdRedNext;
-        responseThresholdBlue = responseThresholdBlueNext;
-
-        System.out.println("Robot: "+this.getId()+" "+"selected task: "+ selectedTask);
-        System.out.println();
-    }
-
-    public void showSelectedTask(){
-        if(selectedTask == "r"){
-            // robot show color white (representing task red)
-            neoPixel.changeColor(255,255,255);
-            // robot sends r msg to neighbouring robots within 20 radius
-            simpleComm.sendMessage("r",20);
-        }else if(selectedTask == "b"){
-            // robot show color green (representing task blue)
-            neoPixel.changeColor(0,255,0);
-            // robot sends b msg to neighbouring robots within 20 radius
-            simpleComm.sendMessage("b",20);
+            
         }
     }
 

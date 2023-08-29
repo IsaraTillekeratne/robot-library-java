@@ -108,22 +108,22 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 //            +this.responseThresholdRedNext+" Next Blue Threshold: "+this.responseThresholdBlueNext
 //            +" Red Probability: "+this.taskSelectionProbabilityRed+" Blue Probability: "+this.taskSelectionProbabilityBlue);
 
-            // long endTime = System.currentTimeMillis(); // Record the end time
-            // long elapsedTime = endTime - startTime; // Calculate the elapsed time in milliseconds
-            // double[] values = {
-            //     this.robotId, 
-            //     elapsedTime,
-            //     this.responseThresholdRed,
-            //     this.responseThresholdBlue,
-            //     this.estimatedTaskDemandForRed,
-            //     this.estimatedTaskDemandForBlue,
-            //     this.estimatedTaskSupplyForRed,
-            //     this.estimatedTaskSupplyForBlue,
-            //     this.taskSelectionProbabilityRed,
-            //     this.taskSelectionProbabilityBlue,
-            // };
+            long endTime = System.currentTimeMillis(); // Record the end time
+            long elapsedTime = endTime - startTime; // Calculate the elapsed time in milliseconds
+            double[] values = {
+                robotId, 
+                elapsedTime,
+                responseThresholdRed,
+                responseThresholdBlue,
+                estimatedTaskDemandForRed,
+                estimatedTaskDemandForBlue,
+                estimatedTaskSupplyForRed,
+                estimatedTaskSupplyForBlue,
+                taskSelectionProbabilityRed,
+                taskSelectionProbabilityBlue,
+            };
 
-            // CsvRecorder.writeRecordToCSV("src/main/java/csvRecorder/record.csv", values, selectedTask);            
+            CsvRecorder.writeRecordToCSV("src/main/java/csvRecorder/record.csv", values, selectedTask);            
 
             this.responseThresholdRed = this.responseThresholdRedNext;
             this.responseThresholdBlue = this.responseThresholdBlueNext;

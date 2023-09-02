@@ -37,32 +37,32 @@ public class App extends Thread {
             reader.close();
 
             // Start a single robot
-            Robot robot0 = new DynamicTaskAllocationRobot(0, 0, 0, 120);
+            Robot robot0 = new DynamicTaskAllocationRobot(0, 0, 0, 90);
             new Thread(robot0).start();
 
-            Robot robot1 = new DynamicTaskAllocationRobot(1,75,0,120);
-            new Thread(robot1).start();
+//            Robot robot1 = new DynamicTaskAllocationRobot(1,0,10,90);
+//            new Thread(robot1).start();
 
-            Robot robot2 = new DynamicTaskAllocationRobot(2,-75,0,120);
-            new Thread(robot2).start();
-
-            Robot robot3 = new DynamicTaskAllocationRobot(3,-75,50,120);
-            new Thread(robot3).start();
-
-            Robot robot4 = new DynamicTaskAllocationRobot(4,75,50,120);
-            new Thread(robot4).start();
-
-            Robot robot5 = new DynamicTaskAllocationRobot(5,50,100,120);
-            new Thread(robot5).start();
-
-            Robot robot6 = new DynamicTaskAllocationRobot(6,-50,100,120);
-            new Thread(robot6).start();
-
-            Robot robot7 = new DynamicTaskAllocationRobot(7,-75,-25,120);
+//            Robot robot2 = new DynamicTaskAllocationRobot(2,-75,0,90);
+//            new Thread(robot2).start();
+//
+//            Robot robot3 = new DynamicTaskAllocationRobot(3,-75,50,90);
+//            new Thread(robot3).start();
+//
+//            Robot robot4 = new DynamicTaskAllocationRobot(4,75,50,90);
+//            new Thread(robot4).start();
+//
+//            Robot robot5 = new DynamicTaskAllocationRobot(5,50,100,90);
+//            new Thread(robot5).start();
+//
+//            Robot robot6 = new DynamicTaskAllocationRobot(6,-50,100,90);
+//            new Thread(robot6).start();
+//
+            Robot robot7 = new DynamicTaskAllocationRobot(7,-100,-40,90);
             new Thread(robot7).start();
-
-            Robot robot8 = new DynamicTaskAllocationRobot(8,100,-50,120);
-            new Thread(robot8).start();
+//
+//            Robot robot8 = new DynamicTaskAllocationRobot(8,100,-50,90);
+//            new Thread(robot8).start();
 
 
 

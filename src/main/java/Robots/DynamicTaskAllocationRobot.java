@@ -6,6 +6,7 @@ import swarm.robot.exception.SensorException;
 import swarm.robot.types.RGBColorType;
 
 import java.util.*;
+import java.util.concurrent.Future;
 
 public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
@@ -27,6 +28,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
     float taskSelectionProbabilityRed;
     float taskSelectionProbabilityBlue;
     String selectedTask;
+    int i = 0;
 
     public DynamicTaskAllocationRobot(int id, double x, double y, double heading) {
         super(id, x, y, heading);
@@ -50,14 +52,32 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         System.out.println("Robot "+this.id+" is running Dynamic Task Allocation Algorithm");
         System.out.println("Robot initially set to task: "+ selectedTask);
         System.out.println("Robot initially assigned random threshold values: r: "+ responseThresholdRed + "  b: "+ responseThresholdBlue);
+
     }
 
     public void loop() throws Exception {
         super.loop();
-        runTaskSelectionAlgorithm();
+//        runTaskAllocationAlgorithm();
+
+        action2Future = executor.submit(() -> {
+
+            try {
+//                i = i + 1;
+//                System.out.println("Task allocation start: "+i);
+                runTaskAllocationAlgorithm();
+//                System.out.println("Task allocation end: "+i);
+            } catch (SensorException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
+        // Wait for both actions to complete
+//        action1Future.get();
+//        action2Future.get();
+
     }
 
-    public void runTaskSelectionAlgorithm() throws SensorException {
+    public void runTaskAllocationAlgorithm() throws SensorException {
 
         // REAL ALGORITHM STARTS HERE
         if (state == robotState.RUN){
@@ -110,5 +130,9 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
             delay(2000); // time interval
         }
     }
+
+//    public void communicationInterrupt(String msg) {
+//        System.out.println("communicationInterrupt on " + id + " with msg:" + msg);
+//    }
 
 }

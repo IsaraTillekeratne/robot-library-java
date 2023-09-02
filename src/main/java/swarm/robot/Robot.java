@@ -17,6 +17,7 @@ import swarm.robot.sensors.ProximitySensor;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Abstract Class implementation for Robot
@@ -48,6 +49,10 @@ public abstract class Robot implements Runnable, IRobotState {
     protected char reality;
     protected robotState state = robotState.WAIT;
 //    public ExecutorService executor;
+    public ExecutorService executor = Executors.newFixedThreadPool(2);
+    public Future<?> action1Future;
+    public Future<?> action2Future;
+    int k = 0;
 
     /**
      * Abstract Robot class
@@ -119,7 +124,10 @@ public abstract class Robot implements Runnable, IRobotState {
         while (true) {
             long begin_time = System.currentTimeMillis();
             try {
+//                k = k+ 1;
+//                System.out.println("Main loop start: "+k);
                 loop();
+//                System.out.println("Main loop end: "+k);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -134,6 +142,7 @@ public abstract class Robot implements Runnable, IRobotState {
                 e.printStackTrace();
             }
         }
+
     }
 
     /**

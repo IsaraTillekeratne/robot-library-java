@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import Robots.*;
+import csvRecorder.CsvRecorder;
 import swarm.robot.VirtualRobot;
 import swarm.robot.exception.SensorException;
 import swarm.robot.sensors.ColorSensor;
@@ -35,6 +36,8 @@ public class App extends Thread {
             MQTTSettings.password = props.getProperty("password");
             MQTTSettings.channel = props.getProperty("channel", "v1");
             reader.close();
+
+            CsvRecorder.addEmptyRowToCSV("src/main/java/csvRecorder/record.csv");
 
             // Start a single robot
             Robot robot0 = new DynamicTaskAllocationRobot(0, 0, 0, 90);

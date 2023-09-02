@@ -5,6 +5,8 @@ import swarm.behaviours.clusterBehaviours.ClusterBehaviours;
 import swarm.robot.exception.SensorException;
 import swarm.robot.types.RGBColorType;
 
+import csvRecorder.CsvRecorder;
+
 import java.util.*;
 import java.util.concurrent.Future;
 
@@ -30,8 +32,12 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
     String selectedTask;
     int i = 0;
 
+    long startTime = System.currentTimeMillis();
+    int robotId;
+
     public DynamicTaskAllocationRobot(int id, double x, double y, double heading) {
         super(id, x, y, heading);
+        robotId = id;
     }
 
     public void setup() {
@@ -122,12 +128,31 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 //            +this.responseThresholdRedNext+" Next Blue Threshold: "+this.responseThresholdBlueNext
 //            +" Red Probability: "+this.taskSelectionProbabilityRed+" Blue Probability: "+this.taskSelectionProbabilityBlue);
 
+            // long endTime = System.currentTimeMillis(); // Record the end time
+            // long elapsedTime = endTime - startTime; // Calculate the elapsed time in milliseconds
+            // double[] values = {
+            //     this.robotId, 
+            //     elapsedTime,
+            //     this.responseThresholdRed,
+            //     this.responseThresholdBlue,
+            //     this.estimatedTaskDemandForRed,
+            //     this.estimatedTaskDemandForBlue,
+            //     this.estimatedTaskSupplyForRed,
+            //     this.estimatedTaskSupplyForBlue,
+            //     this.taskSelectionProbabilityRed,
+            //     this.taskSelectionProbabilityBlue,
+            // };
+
+            // CsvRecorder.writeRecordToCSV("src/main/java/csvRecorder/record.csv", values, selectedTask);            
+
             this.responseThresholdRed = this.responseThresholdRedNext;
             this.responseThresholdBlue = this.responseThresholdBlueNext;
 
 //            showSelectedTask();
             atomicBehaviours.showSelectedTask(selectedTask,this.neoPixel,this.simpleComm,this.getId());
             delay(2000); // time interval
+
+            
         }
     }
 

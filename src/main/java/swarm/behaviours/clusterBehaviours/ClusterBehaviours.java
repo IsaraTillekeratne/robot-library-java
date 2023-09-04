@@ -60,10 +60,10 @@ public class ClusterBehaviours {
             MqttMsg m = robotMqttClient.inQueue();
             if(Objects.equals(m.message, "r")){
                 addSupply("r", taskSupplyQueue, fixedQueueLength);
-//                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
+                System.out.println("Robot: "+robotID+" "+"Received: "+ m.message+" "+m.topic);
             } else if (Objects.equals(m.message, "b")) {
                 addSupply("b", taskSupplyQueue, fixedQueueLength);
-//                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
+                System.out.println("Robot: "+robotID+" "+"Received: "+ m.message+" "+m.topic);
             }
 
         }

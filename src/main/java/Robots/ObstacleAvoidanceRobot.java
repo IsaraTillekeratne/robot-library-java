@@ -15,9 +15,9 @@ import java.util.concurrent.Future;
 public class ObstacleAvoidanceRobot extends VirtualRobot {
 
     // The minimum distance that robot tries to keep with the obstacles
-    private int distanceThreshold = 15;
-    private int moveBackDistanceThreshold = 35;
-    private int sideDistanceThreshold = 25;
+    private int distanceThreshold = 20;
+    private int moveBackDistanceThreshold = 20;
+    private int sideDistanceThreshold = 20;
 
     // The default movement speed
     private int defaultMoveSpeed = 100;
@@ -49,7 +49,6 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
                 throw new RuntimeException(e);
             }
         });
-//        action1Future.get();
 
     }
 

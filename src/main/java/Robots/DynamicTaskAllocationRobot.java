@@ -11,13 +11,15 @@ import csvRecorder.CsvRecorder;
 import java.util.*;
 import java.util.concurrent.Future;
 
+import static swarm.behaviours.clusterBehaviours.Helpers.printQueue;
+
 public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
     ClusterBehaviours clusterBehaviours = new ClusterBehaviours();
     AtomicBehaviours atomicBehaviours = new AtomicBehaviours();
     Queue<String> taskDemandQueue = new LinkedList<>();
     Queue<String> taskSupplyQueue = new LinkedList<>();
-    static int fixedQueueLength = 20;
+    static int fixedQueueLength = 5;
     static float scalingFactor = 0.015f;
     static int n = 10; // steepness of task selection probability
     float responseThresholdRed;
@@ -48,7 +50,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
         // initially assign task Red
         selectedTask = "r";
-        atomicBehaviours.showSelectedTask(selectedTask,this.neoPixel,this.simpleComm,this.getId());
+        atomicBehaviours.showSelectedTask(selectedTask,this.neoPixel,this.simpleComm,robotId);
 
         // assign initial random thresholds
         Random rand = new Random();
@@ -82,26 +84,26 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
     }
 
-    public synchronized void runTaskAllocationAlgorithm() throws SensorException {
+    public void runTaskAllocationAlgorithm() throws SensorException {
 
         // REAL ALGORITHM STARTS HERE
         if (state == robotState.RUN){
 
             RGBColorType detectedColor = colorSensor.getColor();
 
-            clusterBehaviours.observe(detectedColor, this.taskDemandQueue, this.taskSupplyQueue, fixedQueueLength, this.getId(), this.robotMqttClient);
+            clusterBehaviours.observe(detectedColor, this.taskDemandQueue, this.taskSupplyQueue, fixedQueueLength, robotId, this.robotMqttClient);
 
-            float[] taskDemands = clusterBehaviours.evaluateTaskDemand(this.taskDemandQueue, fixedQueueLength, this.getId());
+            float[] taskDemands = clusterBehaviours.evaluateTaskDemand(this.taskDemandQueue, fixedQueueLength, robotId);
             this.estimatedTaskDemandForRed = taskDemands[0];
             this.estimatedTaskDemandForBlue = taskDemands[1];
 
-            float[] taskSupplies = clusterBehaviours.evaluateTaskSupply(this.taskSupplyQueue, fixedQueueLength, this.getId());
+            float[] taskSupplies = clusterBehaviours.evaluateTaskSupply(this.taskSupplyQueue, fixedQueueLength, robotId);
             this.estimatedTaskSupplyForRed = taskSupplies[0];
             this.estimatedTaskSupplyForBlue = taskSupplies[1];
 
 
             List<Object> outputs = clusterBehaviours.selectTask(this.responseThresholdRed,this.responseThresholdBlue,scalingFactor,this.estimatedTaskDemandForRed,this.estimatedTaskSupplyForRed
-            ,this.estimatedTaskDemandForBlue,this.estimatedTaskSupplyForBlue,n,this.getId());
+            ,this.estimatedTaskDemandForBlue,this.estimatedTaskSupplyForBlue,n,robotId);
 
             selectedTask = (String) outputs.get(0);
             this.responseThresholdRedNext = (float) outputs.get(1);
@@ -132,11 +134,22 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
             this.responseThresholdRed = this.responseThresholdRedNext;
             this.responseThresholdBlue = this.responseThresholdBlueNext;
 
-            atomicBehaviours.showSelectedTask(selectedTask,this.neoPixel,this.simpleComm,this.getId());
+            atomicBehaviours.showSelectedTask(selectedTask,this.neoPixel,this.simpleComm,robotId);
             delay(2000); // time interval
 
             
         }
+    }
+    public void communicationInterrupt(String msg) {
+//        System.out.println("communicationInterrupt on " + id + " with msg: " + msg);
+        // check if msg is NOT from the robot itself. Msg format is "r 0" - "taskColor sourceRobotID"
+        String[] parts = msg.split("\\s+");
+        int sourceRobotID = Integer.parseInt(parts[1]);
+        if(!(sourceRobotID ==this.robotId)){
+            // update supply queue
+            clusterBehaviours.addSupply(parts[0],this.taskSupplyQueue,fixedQueueLength);
+        }
+
     }
 
 }

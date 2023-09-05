@@ -15,9 +15,9 @@ import java.util.concurrent.Future;
 public class ObstacleAvoidanceRobot extends VirtualRobot {
 
     // The minimum distance that robot tries to keep with the obstacles
-    private int distanceThreshold = 20;
+    private int distanceThreshold = 30;
     private int moveBackDistanceThreshold = 20;
-    private int sideDistanceThreshold = 20;
+    private int sideDistanceThreshold = 25;
 
     // The default movement speed
     private int defaultMoveSpeed = 100;
@@ -88,7 +88,7 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
 
                 // rotate
                 int loopCount = 0;
-                while (distSensor.getDistance() < distanceThreshold - 8 && loopCount < 5) {
+                while (distSensor.getDistance() < 20 - 8 && loopCount < 5) {
                     // Maximum 5 tries to rotate and find a obstale free path
                     AtomicBehaviours.turn(motion,  defaultMoveSpeed* 0.65, sign, 1000);
                     loopCount++;

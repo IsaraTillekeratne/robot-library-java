@@ -2,14 +2,9 @@ package swarm.mqtt;
 
 import java.util.*;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import swarm.robot.exception.MqttClientException;
 
 public class RobotMqttClient implements MqttCallback {
@@ -128,6 +123,12 @@ public class RobotMqttClient implements MqttCallback {
     public void connectionLost(Throwable t) {
         System.out.println("Connection lost!");
         // code to reconnect to the broker would go here if desired
+        try {
+            client.reconnect();
+            System.out.println("Reconnected");
+        } catch (MqttException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -1,13 +1,25 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+def count_occurrences(dictionary, value_to_count):
+    count = 0
+    for value in dictionary.values():
+        if value == value_to_count:
+            count += 1
+    return count
+
 # Read the Excel file into a DataFrame
 csv_file = "results1.csv"  # Replace with the actual file path
 df = pd.read_csv(csv_file)
 
 # Initialize a dictionary to store the tasks assigned to each robot
-robot_tasks = ["r"] * len(df['RobotID'].unique())
-print(robot_tasks)
+uniqueRobotIDs = df['RobotID'].unique()
+total_robots = len(uniqueRobotIDs)
+print(uniqueRobotIDs)
+robot_tasks_dictionary = {}
+for id in uniqueRobotIDs:
+    robot_tasks_dictionary[id] = "r"
+print(robot_tasks_dictionary)
 
 # Initialize lists to store the time points and proportions of robots with tasks "r" and "b"
 time_points = []
@@ -21,14 +33,12 @@ for _, row in df.iterrows():
     task = row['Task']
 
     # Update the task for the corresponding robot
-    robot_tasks[robot_id] = task
+    robot_tasks_dictionary[robot_id] = task
 
     # Calculate the proportion of robots with tasks "r" and "b" at the current time
-    count_r = robot_tasks.count('r')
-    count_b = robot_tasks.count('b')
-    total_robots = len(robot_tasks)
-    print(robot_tasks)
-
+    count_r = count_occurrences(robot_tasks_dictionary,"r")
+    count_b = count_occurrences(robot_tasks_dictionary,"b")
+    
     proportion_r = count_r / total_robots
     proportion_b = count_b / total_robots
 
@@ -39,7 +49,7 @@ for _, row in df.iterrows():
 
 # Create a single figure for both Time vs Proportion of Robots Assigned to Task "r" and "b"
 plt.figure(figsize=(10, 6))
-
+plt.grid()
 # Plot Time vs Proportion of Robots Assigned to Task "r"
 plt.plot(time_points, proportions_r, label='Task "r"', color='red')
 
@@ -54,6 +64,7 @@ plt.legend()
 # Save or display the combined graph
 plt.savefig("sample_proportion_graph.png")
 plt.show()
+
 
 
 

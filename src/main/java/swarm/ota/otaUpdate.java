@@ -28,7 +28,8 @@ public class otaUpdate {
             // Get the input stream from the connection
             InputStream inputStream = connection.getInputStream();
 
-            String jarFilePath = "recent_builds/java-robot-1.0.2.jar";
+            String jarFilePath = "src/main/java/swarm/App.java";
+            // String jarFilePath = "recent_builds/java-robot-1.0.2.jar";
 
             // Create a File object for the target file
             File jarFile = new File(jarFilePath);

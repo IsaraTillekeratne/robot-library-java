@@ -152,9 +152,7 @@ public class RobotMqttClient implements MqttCallback {
         return this.outQueue.poll();
     }
 
-     // Reconnect method
      private void reconnect() {
-        // You can customize the reconnection logic here
         System.out.println("Reconnecting...");
         while (!isConnected) {
             try {

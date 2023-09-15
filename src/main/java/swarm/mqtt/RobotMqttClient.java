@@ -59,6 +59,7 @@ public class RobotMqttClient implements MqttCallback {
             System.out.println("cause :" + me.getCause());
             System.out.println("excep :" + me);
             me.printStackTrace();
+            reconnect();
         }
     }
 
@@ -123,12 +124,8 @@ public class RobotMqttClient implements MqttCallback {
     public void connectionLost(Throwable t) {
         System.out.println("Connection lost!");
         // code to reconnect to the broker would go here if desired
-        try {
-            client.reconnect();
-            System.out.println("Reconnected");
-        } catch (MqttException e) {
-            throw new RuntimeException(e);
-        }
+        reconnect();
+
     }
 
     @Override
@@ -153,6 +150,20 @@ public class RobotMqttClient implements MqttCallback {
 
     public MqttMsg outQueue() {
         return this.outQueue.poll();
+    }
+
+     // Reconnect method
+     private void reconnect() {
+        // You can customize the reconnection logic here
+        System.out.println("Reconnecting...");
+        while (!isConnected) {
+            try {
+                Thread.sleep(5000); // Sleep for 5 seconds before attempting reconnection
+                connect(); // Attempt reconnection
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

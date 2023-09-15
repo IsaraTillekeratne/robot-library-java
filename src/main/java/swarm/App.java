@@ -39,33 +39,41 @@ public class App extends Thread {
 
             CsvRecorder.addEmptyRowToCSV("src/main/java/csvRecorder/record.csv");
 
-            // Start a single robot
-            Robot robot0 = new DynamicTaskAllocationRobot(0, 0, 0, 120);
-            new Thread(robot0).start();
+            long startTime = System.currentTimeMillis();
 
-            Robot robot1 = new DynamicTaskAllocationRobot(1,75,0,120);
+            // Start a single robot
+//            Robot robot0 = new DynamicTaskAllocationRobot(0, 0, 0, 90, startTime);
+//            new Thread(robot0).start();
+
+            Robot robot1 = new DynamicTaskAllocationRobot(0,20,0,-90, startTime);
             new Thread(robot1).start();
 
-            Robot robot2 = new DynamicTaskAllocationRobot(2,-75,0,120);
+            Robot robot2 = new DynamicTaskAllocationRobot(1,-20,0,-90, startTime);
             new Thread(robot2).start();
 
-            Robot robot3 = new DynamicTaskAllocationRobot(3,-75,50,120);
+            Robot robot3 = new DynamicTaskAllocationRobot(2,60,60,180, startTime);
             new Thread(robot3).start();
 
-            Robot robot4 = new DynamicTaskAllocationRobot(4,75,50,120);
+            Robot robot4 = new DynamicTaskAllocationRobot(3,20,70,180, startTime);
             new Thread(robot4).start();
 
-            Robot robot5 = new DynamicTaskAllocationRobot(5,50,100,120);
+            Robot robot5 = new DynamicTaskAllocationRobot(4,-40,40,-120, startTime);
             new Thread(robot5).start();
 
-            Robot robot6 = new DynamicTaskAllocationRobot(6,-50,100,120);
+            Robot robot6 = new DynamicTaskAllocationRobot(5,-60,-70,0, startTime);
             new Thread(robot6).start();
 
-            Robot robot7 = new DynamicTaskAllocationRobot(7,-75,-25,120);
+            Robot robot7 = new DynamicTaskAllocationRobot(6,-20,-65,0, startTime);
             new Thread(robot7).start();
 
-            Robot robot8 = new DynamicTaskAllocationRobot(8,100,-50,120);
+            Robot robot8 = new DynamicTaskAllocationRobot(7,30,-45,90, startTime);
             new Thread(robot8).start();
+
+            Robot robot9 = new DynamicTaskAllocationRobot(8,75,20,180, startTime);
+            new Thread(robot9).start();
+
+            Robot robot10 = new DynamicTaskAllocationRobot(9,-75,-25,-180, startTime);
+            new Thread(robot10).start();
 
 
 

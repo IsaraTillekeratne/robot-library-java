@@ -8,32 +8,55 @@ import swarm.robot.sensors.DistanceSensor;
 import swarm.robot.types.ProximityReadingType;
 import swarm.behaviours.atomicBehaviours.AtomicBehaviours;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 public class ObstacleAvoidanceRobot extends VirtualRobot {
 
     // The minimum distance that robot tries to keep with the obstacles
-    private int distanceThreshold = 43;
-    private int moveBackDistanceThreshold = 35;
+    private int distanceThreshold = 30;
+    private int moveBackDistanceThreshold = 20;
     private int sideDistanceThreshold = 25;
 
     // The default movement speed
     private int defaultMoveSpeed = 100;
+//    ExecutorService executor = Executors.newFixedThreadPool(1);
+
+    int j = 0;
 
     public ObstacleAvoidanceRobot(int id, double x, double y, double heading) {
         super(id, x, y, heading);
     }
 
     public void setup() {
+
         super.setup();
+
     }
 
     @Override
     public void loop() throws Exception {
         super.loop();
+//        runObstacleAvoidanceWithRandomMove();
+        action1Future = executor.submit(() -> {
+            try {
+//                j = j + 1;
+//                System.out.println("Obs avoid start: "+j);
+                runObstacleAvoidanceWithRandomMove();
+//                System.out.println("Obs avoidance end: "+j);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+    }
+
+    public void runObstacleAvoidanceWithRandomMove() throws Exception{
 
         if (state == robotState.RUN) {
             int F_DIST , LB_DIST, L_DIST, R_DIST, RB_DIST;
-            
-//            System.out.println("\t pros: " + proximity + " dist:  " + F_DIST);
+
             int[] readings = proximitySensor.getProximity().getReadings();
             F_DIST = readings[2];
             LB_DIST = readings[0];
@@ -43,8 +66,7 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
 
 
 
-
-            if (F_DIST < distanceThreshold || L_DIST < distanceThreshold || R_DIST<distanceThreshold) {              
+            if (F_DIST < distanceThreshold || L_DIST < distanceThreshold || R_DIST<distanceThreshold) {
 
                 // moveback if there is space in the back (right & left)
                 if (RB_DIST > moveBackDistanceThreshold && LB_DIST > moveBackDistanceThreshold ) {
@@ -53,14 +75,8 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
 
                 ProximityReadingType prox = proximitySensor.getProximity();
 
-
-                int L = prox.getReadings()[1];
-                int R = prox.getReadings()[3];
-
-            
                 int Left = prox.getReadings()[1];
                 int Right = prox.getReadings()[3];
-
 
                 int sign ;
                 int random = -1000 + ((int) ((Math.random() * 2000)));
@@ -72,7 +88,7 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
 
                 // rotate
                 int loopCount = 0;
-                while (distSensor.getDistance() < distanceThreshold - 8 && loopCount < 5) {
+                while (distSensor.getDistance() < 20 - 8 && loopCount < 5) {
                     // Maximum 5 tries to rotate and find a obstale free path
                     AtomicBehaviours.turn(motion,  defaultMoveSpeed* 0.65, sign, 1000);
                     loopCount++;
@@ -83,8 +99,9 @@ public class ObstacleAvoidanceRobot extends VirtualRobot {
 
 
             } else {
-                AtomicBehaviours.moveForward(motion, defaultMoveSpeed, 900);
+                AtomicBehaviours.moveForward(motion, defaultMoveSpeed, 1000);
             }
         }
+
     }
 }

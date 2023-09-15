@@ -55,18 +55,18 @@ public class ClusterBehaviours {
         System.out.print("Robot: "+robotID+" "+"Task Demand Queue: ");
         printQueue(taskDemandQueue);
 
-        // OBSERVE TASK SUPPLY
-        if(!robotMqttClient.inQueue.isEmpty()){
-            MqttMsg m = robotMqttClient.inQueue();
-            if(Objects.equals(m.message, "r")){
-                addSupply("r", taskSupplyQueue, fixedQueueLength);
-//                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
-            } else if (Objects.equals(m.message, "b")) {
-                addSupply("b", taskSupplyQueue, fixedQueueLength);
-//                System.out.println("Robot: "+this.getId()+" "+"Received: "+ m.message+" "+m.topic);
-            }
-
-        }
+        // OBSERVE TASK SUPPLY - handled in communicationInterrupt method
+//        if(!robotMqttClient.inQueue.isEmpty()){
+//            MqttMsg m = robotMqttClient.inQueue();
+//            if(Objects.equals(m.message, "r")){
+//                addSupply("r", taskSupplyQueue, fixedQueueLength);
+//                System.out.println("Robot: "+robotID+" "+"Received: "+ m.message+" "+m.topic);
+//            } else if (Objects.equals(m.message, "b")) {
+//                addSupply("b", taskSupplyQueue, fixedQueueLength);
+//                System.out.println("Robot: "+robotID+" "+"Received: "+ m.message+" "+m.topic);
+//            }
+//
+//        }
 
         // print task supply queue
         System.out.print("Robot: "+robotID+" "+"Task Supply Queue: ");

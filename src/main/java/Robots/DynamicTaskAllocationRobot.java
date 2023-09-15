@@ -2,12 +2,16 @@ package Robots;
 
 import swarm.behaviours.atomicBehaviours.AtomicBehaviours;
 import swarm.behaviours.clusterBehaviours.ClusterBehaviours;
+import swarm.mqtt.MqttMsg;
 import swarm.robot.exception.SensorException;
 import swarm.robot.types.RGBColorType;
 
 import csvRecorder.CsvRecorder;
 
 import java.util.*;
+import java.util.concurrent.Future;
+
+import static swarm.behaviours.clusterBehaviours.Helpers.printQueue;
 
 public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
@@ -15,7 +19,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
     AtomicBehaviours atomicBehaviours = new AtomicBehaviours();
     Queue<String> taskDemandQueue = new LinkedList<>();
     Queue<String> taskSupplyQueue = new LinkedList<>();
-    static int fixedQueueLength = 20;
+    static int fixedQueueLength = 5;
     static float scalingFactor = 0.015f;
     static int n = 10; // steepness of task selection probability
     float responseThresholdRed;
@@ -29,13 +33,15 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
     float taskSelectionProbabilityRed;
     float taskSelectionProbabilityBlue;
     String selectedTask;
+    int timeStep = 0;
 
-    long startTime = System.currentTimeMillis();
+    long startTime;
     int robotId;
 
-    public DynamicTaskAllocationRobot(int id, double x, double y, double heading) {
+    public DynamicTaskAllocationRobot(int id, double x, double y, double heading, long time) {
         super(id, x, y, heading);
         robotId = id;
+        this.startTime = time;
     }
 
     public void setup() {
@@ -44,8 +50,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
         // initially assign task Red
         selectedTask = "r";
-//        showSelectedTask();
-        atomicBehaviours.showSelectedTask(selectedTask,this.neoPixel,this.simpleComm,this.getId());
+        atomicBehaviours.showSelectedTask(selectedTask,this.neoPixel,this.simpleComm,robotId);
 
         // assign initial random thresholds
         Random rand = new Random();
@@ -53,50 +58,52 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
         this.responseThresholdRed = rand.nextFloat();
         this.responseThresholdBlue = rand.nextFloat();
 
+        CsvRecorder.recordInitialThresholdValues("src/main/java/csvRecorder/record.csv",this.getId(),this.responseThresholdRed,this.responseThresholdBlue);
+
         System.out.println("Robot "+this.id+" is running Dynamic Task Allocation Algorithm");
         System.out.println("Robot initially set to task: "+ selectedTask);
         System.out.println("Robot initially assigned random threshold values: r: "+ responseThresholdRed + "  b: "+ responseThresholdBlue);
+
     }
 
     public void loop() throws Exception {
         super.loop();
-        runTaskSelectionAlgorithm();
+//        runTaskAllocationAlgorithm();
+        action2Future = executor.submit(() -> {
+
+            try {
+//                i = i + 1;
+//                System.out.println("Task allocation start: "+i);
+                runTaskAllocationAlgorithm();
+//                System.out.println("Task allocation end: "+i);
+            } catch (SensorException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
+
     }
 
-    public void runTaskSelectionAlgorithm() throws SensorException {
+    public void runTaskAllocationAlgorithm() throws SensorException {
 
         // REAL ALGORITHM STARTS HERE
         if (state == robotState.RUN){
 
-//            observe();
             RGBColorType detectedColor = colorSensor.getColor();
 
-//            System.out.print("Robot: "+this.getId()+" | task demand before observe: ");
-//            printQueue(taskDemandQueue);
+            clusterBehaviours.observe(detectedColor, this.taskDemandQueue, this.taskSupplyQueue, fixedQueueLength, robotId, this.robotMqttClient);
 
-            clusterBehaviours.observe(detectedColor, this.taskDemandQueue, this.taskSupplyQueue, fixedQueueLength, this.getId(), this.robotMqttClient);
-
-//            System.out.print("Robot: "+this.getId()+" | task demand after observe: ");
-//            printQueue(taskDemandQueue);
-
-//            evaluateTaskDemand();
-//            System.out.println("Robot: "+this.getId()+" "+"Task demand for blue before: "+ estimatedTaskDemandForRed);
-            float[] taskDemands = clusterBehaviours.evaluateTaskDemand(this.taskDemandQueue, fixedQueueLength, this.getId());
+            float[] taskDemands = clusterBehaviours.evaluateTaskDemand(this.taskDemandQueue, fixedQueueLength, robotId);
             this.estimatedTaskDemandForRed = taskDemands[0];
             this.estimatedTaskDemandForBlue = taskDemands[1];
-//            System.out.println("Robot: "+this.getId()+" "+"Task demand for blue after: "+ estimatedTaskDemandForRed);
-//            evaluateTaskSupply();
-            float[] taskSupplies = clusterBehaviours.evaluateTaskSupply(this.taskSupplyQueue, fixedQueueLength, this.getId());
+
+            float[] taskSupplies = clusterBehaviours.evaluateTaskSupply(this.taskSupplyQueue, fixedQueueLength, robotId);
             this.estimatedTaskSupplyForRed = taskSupplies[0];
             this.estimatedTaskSupplyForBlue = taskSupplies[1];
 
-//            System.out.println("Robot: "+this.getId()+" Selected task: "+selectedTask+" Current Red Threshold: "
-//                    +this.responseThresholdRed+" Current Blue Threshold: "+this.responseThresholdBlue
-//                    +" Red Probability: "+this.taskSelectionProbabilityRed+" Blue Probability: "+this.taskSelectionProbabilityBlue);
 
-            // selectTask();
             List<Object> outputs = clusterBehaviours.selectTask(this.responseThresholdRed,this.responseThresholdBlue,scalingFactor,this.estimatedTaskDemandForRed,this.estimatedTaskSupplyForRed
-            ,this.estimatedTaskDemandForBlue,this.estimatedTaskSupplyForBlue,n,this.getId());
+            ,this.estimatedTaskDemandForBlue,this.estimatedTaskSupplyForBlue,n,robotId);
 
             selectedTask = (String) outputs.get(0);
             this.responseThresholdRedNext = (float) outputs.get(1);
@@ -104,36 +111,44 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
             this.taskSelectionProbabilityRed = (float) outputs.get(3);
             this.taskSelectionProbabilityBlue = (float) outputs.get(4);
 
-//            System.out.println("Robot: "+this.getId()+" Selected task: "+selectedTask+" Next Red Threshold: "
-//            +this.responseThresholdRedNext+" Next Blue Threshold: "+this.responseThresholdBlueNext
-//            +" Red Probability: "+this.taskSelectionProbabilityRed+" Blue Probability: "+this.taskSelectionProbabilityBlue);
+            this.timeStep = this.timeStep + 1;
+             long endTime = System.currentTimeMillis(); // Record the end time
+             long elapsedTime = endTime - startTime; // Calculate the elapsed time in milliseconds
+             double[] values = {
+                 this.robotId,
+                 elapsedTime,
+//                     this.timeStep,
+                 this.responseThresholdRed,
+                 this.responseThresholdBlue,
+                 this.estimatedTaskDemandForRed,
+                 this.estimatedTaskDemandForBlue,
+                 this.estimatedTaskSupplyForRed,
+                 this.estimatedTaskSupplyForBlue,
+                 this.taskSelectionProbabilityRed,
+                 this.taskSelectionProbabilityBlue,
+             };
 
-            long endTime = System.currentTimeMillis(); // Record the end time
-            long elapsedTime = endTime - startTime; // Calculate the elapsed time in milliseconds
-            double[] values = {
-                robotId, 
-                elapsedTime,
-                responseThresholdRed,
-                responseThresholdBlue,
-                estimatedTaskDemandForRed,
-                estimatedTaskDemandForBlue,
-                estimatedTaskSupplyForRed,
-                estimatedTaskSupplyForBlue,
-                taskSelectionProbabilityRed,
-                taskSelectionProbabilityBlue,
-            };
-
-            CsvRecorder.writeRecordToCSV("src/main/java/csvRecorder/record.csv", values, selectedTask);            
+             CsvRecorder.writeRecordToCSV("src/main/java/csvRecorder/record.csv", values, selectedTask);
 
             this.responseThresholdRed = this.responseThresholdRedNext;
             this.responseThresholdBlue = this.responseThresholdBlueNext;
 
-//            showSelectedTask();
-            atomicBehaviours.showSelectedTask(selectedTask,this.neoPixel,this.simpleComm,this.getId());
+            atomicBehaviours.showSelectedTask(selectedTask,this.neoPixel,this.simpleComm,robotId);
             delay(2000); // time interval
 
             
         }
+    }
+    public void communicationInterrupt(String msg) {
+//        System.out.println("communicationInterrupt on " + id + " with msg: " + msg);
+        // check if msg is NOT from the robot itself. Msg format is "r 0" - "taskColor sourceRobotID"
+        String[] parts = msg.split("\\s+");
+        int sourceRobotID = Integer.parseInt(parts[1]);
+        if(!(sourceRobotID ==this.robotId)){
+            // update supply queue
+            clusterBehaviours.addSupply(parts[0],this.taskSupplyQueue,fixedQueueLength);
+        }
+
     }
 
 }

@@ -32,6 +32,20 @@ public class CsvRecorder {
     public static void addEmptyRowToCSV(String filePath) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
             writer.write("\n");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void recordInitialThresholdValues(String filePath, int robotID, float redThreshold, float blueThreshold){
+
+        String[] columnNames = {"RobotID", "RedThreshold", "BlueThreshold"};
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+            writer.write(String.join(",", columnNames) + "\n");
+            writer.write(robotID + "," + redThreshold + "," + blueThreshold + "\n");
+            writer.write("\n");
         } catch (IOException e) {
             e.printStackTrace();
         }

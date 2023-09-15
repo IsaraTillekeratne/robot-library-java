@@ -103,7 +103,7 @@ public class ProximitySensor extends AbstractSensor {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            System.out.print(".");
+//            System.out.print(".");
             robot.delay(100);
             timeout = (System.currentTimeMillis() - startTime > MQTT_TIMEOUT);
         }

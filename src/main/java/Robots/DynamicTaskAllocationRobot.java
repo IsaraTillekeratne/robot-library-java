@@ -111,7 +111,6 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
             this.taskSelectionProbabilityRed = (float) outputs.get(3);
             this.taskSelectionProbabilityBlue = (float) outputs.get(4);
 
-
             this.timeStep = this.timeStep + 1;
              long endTime = System.currentTimeMillis(); // Record the end time
              long elapsedTime = endTime - startTime; // Calculate the elapsed time in milliseconds

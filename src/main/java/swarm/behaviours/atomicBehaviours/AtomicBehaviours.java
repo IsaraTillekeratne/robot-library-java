@@ -38,4 +38,43 @@ public class AtomicBehaviours {
         System.out.println();
     }
 
+    public static void moveSquiggly(MotionController motion, int speed, int duration) {
+    int leftSpeed = speed;
+    int rightSpeed = speed;
+
+    int angleChange = 50; 
+
+    long startTime = System.currentTimeMillis();
+    while (System.currentTimeMillis() - startTime < duration / 2) {
+        // Alternate the wheel speeds to create a squiggly motion
+        motion.move(leftSpeed, rightSpeed, 1000); 
+
+        // Add an angle change to one of the wheels to make it squiggly
+        leftSpeed += angleChange;
+        leftSpeed = Math.max(0, Math.min(100, leftSpeed)); 
+
+        // Stop the other wheel to make a half circle
+        rightSpeed = 0;
+    }
+
+    // Swap the direction by reversing the angle change
+    angleChange = -angleChange;
+
+    // Loop for the second half of the specified duration
+    startTime = System.currentTimeMillis();
+    while (System.currentTimeMillis() - startTime < duration / 2) {
+        motion.move(leftSpeed, rightSpeed, 100); 
+
+        //  angle change 
+        leftSpeed += angleChange;
+        leftSpeed = Math.max(0, Math.min(100, leftSpeed)); // Assuming speed range is 0-100
+
+        // Stop the other wheel to complete the circle 
+        rightSpeed = 0;
+    }
+
+    // Stop the motion 
+    motion.move(0, 0, 100);
+}
+
 }

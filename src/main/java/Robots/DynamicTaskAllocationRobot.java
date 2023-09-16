@@ -103,7 +103,7 @@ public class DynamicTaskAllocationRobot extends ObstacleAvoidanceRobot{
 
 
             List<Object> outputs = clusterBehaviours.selectTask(this.responseThresholdRed,this.responseThresholdBlue,scalingFactor,this.estimatedTaskDemandForRed,this.estimatedTaskSupplyForRed
-            ,this.estimatedTaskDemandForBlue,this.estimatedTaskSupplyForBlue,n,robotId);
+            ,this.estimatedTaskDemandForBlue,this.estimatedTaskSupplyForBlue,n,robotId,this.selectedTask);
 
             selectedTask = (String) outputs.get(0);
             this.responseThresholdRedNext = (float) outputs.get(1);

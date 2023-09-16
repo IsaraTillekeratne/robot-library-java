@@ -110,7 +110,7 @@ public class ClusterBehaviours {
 
     }
 
-    public List<Object> selectTask(float responseThresholdRed, float responseThresholdBlue, float scalingFactor, float estimatedTaskDemandForRed, float estimatedTaskSupplyForRed, float estimatedTaskDemandForBlue, float estimatedTaskSupplyForBlue, int n, int robotID){ // Cluster Behaviour
+    public List<Object> selectTask(float responseThresholdRed, float responseThresholdBlue, float scalingFactor, float estimatedTaskDemandForRed, float estimatedTaskSupplyForRed, float estimatedTaskDemandForBlue, float estimatedTaskSupplyForBlue, int n, int robotID, String currentTask){ // Cluster Behaviour
 
         List<Object> list = new ArrayList<>();
 
@@ -133,8 +133,11 @@ public class ClusterBehaviours {
         if(taskSelectionProbabilityRed < taskSelectionProbabilityBlue){
             selectedTask = "b";
             list.add(selectedTask);
-        }else if(taskSelectionProbabilityBlue <= taskSelectionProbabilityRed){ // even if equal, assign red | CHECK
+        }else if(taskSelectionProbabilityBlue < taskSelectionProbabilityRed){ // even if equal, assign red | CHECK
             selectedTask = "r";
+            list.add(selectedTask);
+        }else{
+            selectedTask = currentTask;
             list.add(selectedTask);
         }
 

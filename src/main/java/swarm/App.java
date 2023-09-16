@@ -11,11 +11,8 @@ import java.util.Properties;
 
 import Robots.*;
 import csvRecorder.CsvRecorder;
-import swarm.robot.VirtualRobot;
-import swarm.robot.exception.SensorException;
-import swarm.robot.sensors.ColorSensor;
 
-public class App extends Thread {
+public class Main extends Thread {
 
     public static void main(String[] args) {
 

@@ -18,55 +18,83 @@ public class otaUpdate {
  
     public void downloadBinFile() {
         try {
-            String updateJarEndpoint = "http://localhost:5001/updateJar"; 
+    
+            // Create an array to store the URLs
+            String[] endpoints = { "http://localhost:5001/updateAppJava", "http://localhost:5001/updateAlgorithm" };
+    
+            // Create an array to store the downloaded file paths
+            String[] filePaths = {"src/main/java/swarm/", "src/main/java/Robots/"};
 
-            // Create a URL object
-            URL url = new URL(updateJarEndpoint);
+            String[] _filePaths = new String[2];
 
-            // Open a connection to the URL
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    
+            for (int i = 0; i < 2; i++) {
+                // Create a URL object for the current endpoint
+                URL url = new URL(endpoints[i]);
+    
+                // Open a connection to the URL
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    
+                // Set the request method to GET
+                connection.setRequestMethod("GET");
+    
+                // Get the input stream from the connection
+                InputStream inputStream = connection.getInputStream();
+    
+                // Get the file name from the content disposition header
+                String contentDisposition = connection.getHeaderField("Content-Disposition");
+                String fileName = "downloaded" + i + ".jar"; // Default name if header is not present
+    
+                if (contentDisposition != null && contentDisposition.contains("filename=")) {
+                    int index = contentDisposition.indexOf("filename=");
+                    fileName = contentDisposition.substring(index + 9); // 9 is the length of "filename="
+                }
+    
+                String filePath = filePaths[i] + fileName.replace("\"", "");
 
-            // Set the request method to GET
-            connection.setRequestMethod("GET");
+                System.out.println("filePath:"+filePath);
 
-            // Get the input stream from the connection
-            InputStream inputStream = connection.getInputStream();
-
-            String jarFilePath = "src/main/java/swarm/App.java";
-            // String jarFilePath = "recent_builds/java-robot-1.0.2.jar";
-
-            // Create a File object for the target file
-            File jarFile = new File(jarFilePath);
-
-            // Create parent directories if they don't exist
-        if (!jarFile.getParentFile().exists()) {
-            jarFile.getParentFile().mkdirs();
-        } 
-
-            // Create a FileOutputStream to write the .jar file
-            FileOutputStream outputStream = new FileOutputStream(jarFilePath);
-
-            // Read data from the input stream and write it to the output stream
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
+                // Create a File object for the target file
+                File jarFile = new File(filePath);
+    
+                // Create parent directories if they don't exist
+                if (!jarFile.getParentFile().exists()) {
+                    jarFile.getParentFile().mkdirs();
+                }
+    
+                // Create a FileOutputStream to write the .jar file
+                FileOutputStream outputStream = new FileOutputStream(filePath);
+    
+                // Read data from the input stream and write it to the output stream
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+    
+                // Close the output stream and input stream
+                outputStream.close();
+                inputStream.close();
+    
+                // Store the file path in the array
+                _filePaths[i] = filePath;
+    
+                // Print a success message for each file
+                System.out.println("Downloaded file successfully to: " + filePath);
             }
-
-            // Close the output stream and input stream
-            outputStream.close();
-            inputStream.close();
-
-            // Print a success message
-            System.out.println("Downloaded .jar file successfully to: " + jarFilePath);
-
-            // Launch the application
-            launchApplication();
+    
+            // If both downloads were successful, then launch the application
+            if (_filePaths[0] != null && _filePaths[1] != null) {
+                launchApplication();
+            }
+            // }
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Failed to download .jar file.");
         }
     }
+    
+    
 
     private static void shutdownApplication() {
         // Perform cleanup, save state, close resources, etc.

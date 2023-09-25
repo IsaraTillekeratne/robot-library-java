@@ -9,7 +9,7 @@ def count_occurrences(dictionary, value_to_count):
     return count
 
 # Read the Excel file into a DataFrame
-csv_file = "results1.csv"  # Replace with the actual file path
+csv_file = "results1_9010.csv"  # Replace with the actual file path
 df = pd.read_csv(csv_file)
 
 # Initialize a dictionary to store the tasks assigned to each robot
@@ -62,7 +62,7 @@ plt.title('Time vs Proportion of Robots Assigned to Tasks "r" and "b"')
 plt.legend()
 
 # Save or display the combined graph
-plt.savefig("sample_proportion_graph.png")
+plt.savefig("proportion_graph_9010.png")
 plt.show()
 
 

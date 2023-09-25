@@ -69,7 +69,7 @@ public abstract class Robot implements Runnable, IRobotState {
         this.reality = reality;
 
         robotMqttClient = new RobotMqttClient(MQTTSettings.server, MQTTSettings.port, MQTTSettings.userName,
-                MQTTSettings.password, MQTTSettings.channel);
+                MQTTSettings.password, MQTTSettings.channel,this.id);
 
         coordinates = new Coordinate(id, x, y, heading, robotMqttClient);
         robotMQTT = new RobotMQTT(id, robotMqttClient, reality);
@@ -122,12 +122,10 @@ public abstract class Robot implements Runnable, IRobotState {
 
         // noinspection InfiniteLoopStatement
         while (true) {
+//            System.out.println("Robot "+id+" is running...");
             long begin_time = System.currentTimeMillis();
             try {
-//                k = k+ 1;
-//                System.out.println("Main loop start: "+k);
                 loop();
-//                System.out.println("Main loop end: "+k);
             } catch (Exception e) {
                 e.printStackTrace();
             }

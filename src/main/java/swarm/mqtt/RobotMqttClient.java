@@ -5,11 +5,14 @@ import java.util.*;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import swarm.robot.Robot;
 import swarm.robot.exception.MqttClientException;
 
 public class RobotMqttClient implements MqttCallback {
     private MqttClient client;
     private boolean isConnected = false;
+
+    int robotID;
 
     private final String server;
     private final int port;
@@ -20,13 +23,14 @@ public class RobotMqttClient implements MqttCallback {
     public Queue<MqttMsg> outQueue = new PriorityQueue<MqttMsg>();
 
     // Documentation: https://www.eclipse.org/paho/files/javadoc/index.html
-    public RobotMqttClient(String server, int port, String userName, String password, String channel) {
+    public RobotMqttClient(String server, int port, String userName, String password, String channel, int id) {
 
         this.server = server;
         this.port = port;
         this.userName = userName;
         this.password = password;
         this.channel = channel;
+        this.robotID = id;
 
         connect();
     }
@@ -50,7 +54,7 @@ public class RobotMqttClient implements MqttCallback {
 
             client.setCallback(this);
 
-            System.out.println("MQTT: Connected");
+            System.out.println("Robot "+this.robotID+" MQTT: Connected");
 
         } catch (org.eclipse.paho.client.mqttv3.MqttException me) {
             System.out.println("reason :" + me.getReasonCode());
@@ -122,8 +126,9 @@ public class RobotMqttClient implements MqttCallback {
 
     @Override
     public void connectionLost(Throwable t) {
-        System.out.println("Connection lost!");
+        System.out.println("Robot "+robotID+" Connection lost!");
         // code to reconnect to the broker would go here if desired
+        isConnected = false;
         reconnect();
 
     }
@@ -155,13 +160,27 @@ public class RobotMqttClient implements MqttCallback {
      private void reconnect() {
         System.out.println("Reconnecting...");
         while (!isConnected) {
-            try {
-                Thread.sleep(5000); // Sleep for 5 seconds before attempting reconnection
-                connect(); // Attempt reconnection
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            connect(); // Attempt reconnection
+//            try {
+//                Thread.sleep(5000); // Sleep for 5 seconds before attempting reconnection
+//                connect(); // Attempt reconnection
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
         }
+//        System.out.println("Subscribe after reconnecting...");
+//        subscribe("localization/update/?");
+//        subscribe("robot/msg/"+robotID);
+//        subscribe("robot/msg/broadcast");
+//        subscribe("robot/ota/broadcast");
+//        subscribe("sensor/distance/"+robotID);
+//        subscribe("sensor/distance/"+robotID+"/?");
+//        subscribe("sensor/proximity/"+robotID);
+//        subscribe("sensor/color/"+robotID);
+//        subscribe("sensor/color/"+robotID+"/?");
+//        subscribe("comm/in/simple/"+robotID);
+//        subscribe("comm/in/direct/"+robotID);
+
     }
 
 }

@@ -12,7 +12,7 @@ import java.util.Properties;
 import Robots.*;
 import csvRecorder.CsvRecorder;
 
-public class Main extends Thread {
+public class App extends Thread {
 
     public static void main(String[] args) {
 

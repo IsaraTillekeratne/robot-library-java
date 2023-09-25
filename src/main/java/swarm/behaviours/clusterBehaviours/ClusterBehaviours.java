@@ -116,9 +116,20 @@ public class ClusterBehaviours {
 
         // calculate new response threshold for Red
         float responseThresholdRedNext = (responseThresholdRed - (scalingFactor * (estimatedTaskDemandForRed - estimatedTaskSupplyForRed)));
+        if(responseThresholdRedNext<0){
+            responseThresholdRedNext = 0;
+        }else if(responseThresholdRedNext>1){
+            responseThresholdRedNext = 1;
+        }
         System.out.println("Robot: "+robotID+" "+"Next Response threshold for red calculated: "+ responseThresholdRedNext);
         // calculate new response threshold for Blue
         float responseThresholdBlueNext = (responseThresholdBlue - (scalingFactor * (estimatedTaskDemandForBlue - estimatedTaskSupplyForBlue)));
+        if(responseThresholdBlueNext<0){
+            responseThresholdBlueNext = 0;
+        }else if(responseThresholdBlueNext>1){
+            responseThresholdBlueNext = 1;
+        }
+
         System.out.println("Robot: "+robotID+" "+"Next Response threshold for blue calculated: "+ responseThresholdBlueNext);
 
         // calculate task selection probability for Red

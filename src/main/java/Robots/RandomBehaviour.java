@@ -29,11 +29,11 @@ public class RandomBehaviour extends VirtualRobot {
         super.loop();
 
         if (state == robotState.RUN) {
-AtomicBehaviours.moveForward(motion, defaultMoveSpeed, 2000);
-AtomicBehaviours.turn(motion, defaultMoveSpeed*0.9, 1 , 1000);
-neoPixel.changeColor(0, 0, 255);
-AtomicBehaviours.moveForward(motion, defaultMoveSpeed, 2000);
-neoPixel.changeColor(0, 255, 0);
+            AtomicBehaviours.moveForward(motion, defaultMoveSpeed, 2000);
+            AtomicBehaviours.turn(motion, defaultMoveSpeed*0.9, 1 , 1000);
+            neoPixel.changeColor(0, 0, 255);
+            AtomicBehaviours.moveForward(motion, defaultMoveSpeed, 2000);
+            neoPixel.changeColor(0, 255, 0);
 
         }
     }

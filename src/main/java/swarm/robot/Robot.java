@@ -99,9 +99,6 @@ public abstract class Robot implements Runnable, IRobotState {
 
         coordinates.setCoordinate(coordinates.getX(), coordinates.getY(), coordinates.getHeading());
         coordinates.publishCoordinate();
-
-        // Create a thread pool with two threads
-//        executor = Executors.newFixedThreadPool(2);
     }
 
     /**

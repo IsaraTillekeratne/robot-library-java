@@ -22,6 +22,7 @@ public class RobotMqttClient implements MqttCallback {
     public Queue<MqttMsg> inQueue = new PriorityQueue<MqttMsg>();
     public Queue<MqttMsg> outQueue = new PriorityQueue<MqttMsg>();
 
+
     // Documentation: https://www.eclipse.org/paho/files/javadoc/index.html
     public RobotMqttClient(String server, int port, String userName, String password, String channel, int id) {
 
@@ -158,8 +159,8 @@ public class RobotMqttClient implements MqttCallback {
     }
 
      private void reconnect() {
-        System.out.println("Reconnecting...");
         while (!isConnected) {
+            System.out.println("Reconnecting...");
             connect(); // Attempt reconnection
 //            try {
 //                Thread.sleep(5000); // Sleep for 5 seconds before attempting reconnection
@@ -168,18 +169,6 @@ public class RobotMqttClient implements MqttCallback {
 //                e.printStackTrace();
 //            }
         }
-//        System.out.println("Subscribe after reconnecting...");
-//        subscribe("localization/update/?");
-//        subscribe("robot/msg/"+robotID);
-//        subscribe("robot/msg/broadcast");
-//        subscribe("robot/ota/broadcast");
-//        subscribe("sensor/distance/"+robotID);
-//        subscribe("sensor/distance/"+robotID+"/?");
-//        subscribe("sensor/proximity/"+robotID);
-//        subscribe("sensor/color/"+robotID);
-//        subscribe("sensor/color/"+robotID+"/?");
-//        subscribe("comm/in/simple/"+robotID);
-//        subscribe("comm/in/direct/"+robotID);
 
     }
 
